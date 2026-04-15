@@ -11,7 +11,7 @@ export const sqlTheme: ThemeInput = {
   tokenColors: [
     {
       scope: ['comment', 'punctuation.definition.comment', 'string.comment'],
-      settings: { foreground: '#636f6299' },
+      settings: { foreground: '#ffffff', fontStyle: 'bold' },
     },
     {
       scope: ['keyword.control.sql', 'keyword.control.DML.sql'],
