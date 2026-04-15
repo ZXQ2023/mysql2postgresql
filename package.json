@@ -1,0 +1,33 @@
+{
+  "name": "mysql2postgresql",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc --noEmit && vite build",
+    "preview": "vite preview"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.33.0",
+  "dependencies": {
+    "@vueuse/core": "^14.2.1",
+    "shiki": "^4.0.2",
+    "vue": "^3.5.32",
+    "vue-router": "^5.0.4"
+  },
+  "devDependencies": {
+    "@iconify-json/carbon": "^1.2.20",
+    "@unocss/preset-attributify": "^66.6.8",
+    "@unocss/preset-icons": "^66.6.8",
+    "@unocss/preset-uno": "^66.6.8",
+    "@unocss/transformer-directives": "^66.6.8",
+    "@vitejs/plugin-vue": "^6.0.6",
+    "typescript": "^6.0.2",
+    "unocss": "^66.6.8",
+    "vite": "^8.0.8",
+    "vue-tsc": "^3.2.6"
+  }
+}
