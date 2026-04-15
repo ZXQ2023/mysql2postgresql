@@ -1,5 +1,6 @@
 import { ref, shallowRef } from 'vue'
 import { createHighlighter, type Highlighter, type LanguageInput } from 'shiki'
+import { sqlTheme } from './sqlTheme'
 
 const highlighter = shallowRef<Highlighter | null>(null)
 const loading = ref(false)
@@ -339,7 +340,7 @@ async function getHighlighter() {
 
   loading.value = true
   highlighter.value = await createHighlighter({
-    themes: ['vitesse-dark'],
+    themes: [sqlTheme],
     langs: [mysqlLang(), pgsqlLang()],
   })
   loading.value = false
@@ -352,8 +353,8 @@ export function useShiki() {
 
   async function highlight(mysql: string, postgresql: string) {
     const h = await getHighlighter()
-    highlightedMySQL.value = h.codeToHtml(mysql, { lang: 'mysql', theme: 'vitesse-dark' })
-    highlightedPostgreSQL.value = h.codeToHtml(postgresql, { lang: 'pgsql', theme: 'vitesse-dark' })
+    highlightedMySQL.value = h.codeToHtml(mysql, { lang: 'mysql', theme: 'sql-dark' })
+    highlightedPostgreSQL.value = h.codeToHtml(postgresql, { lang: 'pgsql', theme: 'sql-dark' })
   }
 
   return { highlightedMySQL, highlightedPostgreSQL, highlight }
