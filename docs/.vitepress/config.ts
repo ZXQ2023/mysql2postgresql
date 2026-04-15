@@ -4,6 +4,11 @@ export default defineConfig({
   title: 'MySQL → PostgreSQL',
   description: 'MySQL 到 PostgreSQL 迁移速查手册',
   lang: 'zh-CN',
+  vite: {
+    optimizeDeps: {
+      exclude: ['@electric-sql/pglite'],
+    },
+  },
   head: [
     ['link', { rel: 'preconnect', href: 'https://fonts.googleapis.com' }],
     ['link', { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: '' }],
@@ -48,6 +53,7 @@ export default defineConfig({
           { text: '系统管理', link: '/admin' },
         ],
       },
+      { text: 'Playground', link: '/playground' },
     ],
     sidebar: [
       {
@@ -94,6 +100,13 @@ export default defineConfig({
         collapsed: false,
         items: [
           { text: '系统管理', link: '/admin' },
+        ],
+      },
+      {
+        text: '实验',
+        collapsed: false,
+        items: [
+          { text: 'Playground', link: '/playground' },
         ],
       },
     ],
