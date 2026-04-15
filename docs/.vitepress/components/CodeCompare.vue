@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, watch, useSlots } from 'vue'
 import { createHighlighter, type Highlighter } from 'shiki'
+import MarkdownIt from 'markdown-it'
 import { sqlTheme } from '../theme/sqlTheme'
 import { mysqlLang, pgsqlLang } from '../theme/sqlLanguages'
 
@@ -10,6 +11,46 @@ const props = defineProps<{
   mysql: string
   postgresql: string
 }>()
+
+const slots = useSlots()
+const md = new MarkdownIt({ html: true, breaks: true })
+
+function getSlotText(): string {
+  const nodes = slots.default?.()
+  if (!nodes) return ''
+  return nodes
+    .map(node => {
+      if (typeof node.children === 'string') return node.children
+      if (Array.isArray(node.children)) {
+        return node.children
+          .map(c => typeof c === 'string' ? c : String((c as any).children ?? ''))
+          .join('')
+      }
+      return ''
+    })
+    .join('')
+}
+
+const noteHtml = computed(() => {
+  const text = getSlotText().trim()
+  if (!text) return ''
+  // Match ::: type [title] ... ::: (works with or without newlines)
+  const m = text.match(/^:::\s*(warning|tip|info|danger|details)([\s\S]*?):::\s*$/)
+  if (!m) return md.render(text)
+  const type = m[1]
+  let content = m[2].trim()
+  let title = ''
+  // Multi-line: first line after type is title
+  const nlIdx = content.indexOf('\n')
+  if (nlIdx > 0) {
+    title = content.slice(0, nlIdx).trim()
+    content = content.slice(nlIdx + 1).trim()
+  }
+  let html = `<div class="custom-block ${type}">`
+  if (title) html += `<p class="custom-block-title">${md.renderInline(title)}</p>`
+  html += md.render(content) + '</div>'
+  return html
+})
 
 const mysqlHtml = ref('')
 const pgsqlHtml = ref('')
@@ -56,9 +97,7 @@ watch(() => [props.mysql, props.postgresql], highlight)
         <div class="code-wrapper" v-html="pgsqlHtml" />
       </div>
     </div>
-    <div v-if="$slots.default" class="compare-note">
-      <slot />
-    </div>
+    <div v-if="noteHtml" class="compare-note" v-html="noteHtml" />
   </div>
 </template>
 
