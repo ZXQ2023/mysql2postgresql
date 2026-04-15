@@ -1,11 +1,6 @@
-import { ref, shallowRef } from 'vue'
-import { createHighlighter, type Highlighter, type LanguageInput } from 'shiki'
-import { sqlTheme } from './sqlTheme'
+import type { LanguageInput } from 'shiki'
 
-const highlighter = shallowRef<Highlighter | null>(null)
-const loading = ref(false)
-
-function mysqlLang(): LanguageInput {
+export function mysqlLang(): LanguageInput {
   return {
     name: 'mysql',
     scopeName: 'source.sql',
@@ -150,7 +145,7 @@ function mysqlLang(): LanguageInput {
   }
 }
 
-function pgsqlLang(): LanguageInput {
+export function pgsqlLang(): LanguageInput {
   return {
     name: 'pgsql',
     scopeName: 'source.sql.pgsql',
@@ -206,7 +201,7 @@ function pgsqlLang(): LanguageInput {
         name: 'support.function.math.sql',
       },
       {
-        match: '(?i)\\b(JSON_ARRAY|JSON_OBJECT|JSON_BUILD_ARRAY|JSON_BUILD_OBJECT|TO_JSON|TO_JSONB|JSONB_BUILD_ARRAY|JSONB_BUILD_OBJECT|JSON_ARRAY_ELEMENTS|JSON_ARRAY_ELEMENTS_TEXT|JSONB_ARRAY_ELEMENTS|JSONB_ARRAY_ELEMENTS_TEXT|JSON_EACH|JSON_EACH_TEXT|JSONB_EACH|JSONB_EACH_TEXT|JSON_EXTRACT_PATH|JSON_EXTRACT_PATH_TEXT|JSONB_EXTRACT_PATH|JSONB_EXTRACT_PATH_TEXT|JSON_INSERT|JSON_REPLACE|JSON_SET|JSONB_SET|JSONB_SET_LAX|JSONB_INSERT|JSON_STRIP_NULLS|JSONB_STRIP_NULLS|JSON_TYPEOF|JSONB_TYPEOF|JSON_TO_RECORD| JSONB_TO_RECORD|JSON_TO_RECORDSET|JSONB_TO_RECORDSET|JSON_POPULATE_RECORD|JSONB_POPULATE_RECORD|JSON_POPULATE_RECORDSET|JSONB_POPULATE_RECORDSET|JSONB_PRETTY|ROW_TO_JSON|JSON_AGG|JSONB_AGG|JSON_OBJECT_AGG|JSONB_OBJECT_AGG|JSONB_PATH_EXISTS|JSONB_PATH_MATCH|JSONB_PATH_QUERY|JSONB_PATH_QUERY_ARRAY|JSONB_PATH_QUERY_FIRST|JSONB_PATH_EXISTS_TZ|JSONB_PATH_MATCH_TZ|JSONB_PATH_QUERY_TZ|JSONB_PATH_QUERY_ARRAY_TZ|JSONB_PATH_QUERY_FIRST_TZ)\\b\\s*(?=\\()',
+        match: '(?i)\\b(JSON_ARRAY|JSON_OBJECT|JSON_BUILD_ARRAY|JSON_BUILD_OBJECT|TO_JSON|TO_JSONB|JSONB_BUILD_ARRAY|JSONB_BUILD_OBJECT|JSON_ARRAY_ELEMENTS|JSON_ARRAY_ELEMENTS_TEXT|JSONB_ARRAY_ELEMENTS|JSONB_ARRAY_ELEMENTS_TEXT|JSON_EACH|JSON_EACH_TEXT|JSONB_EACH|JSONB_EACH_TEXT|JSON_EXTRACT_PATH|JSON_EXTRACT_PATH_TEXT|JSONB_EXTRACT_PATH|JSONB_EXTRACT_PATH_TEXT|JSON_INSERT|JSON_REPLACE|JSON_SET|JSONB_SET|JSONB_SET_LAX|JSONB_INSERT|JSON_STRIP_NULLS|JSONB_STRIP_NULLS|JSON_TYPEOF|JSONB_TYPEOF|JSON_TO_RECORD|JSONB_TO_RECORD|JSON_TO_RECORDSET|JSONB_TO_RECORDSET|JSON_POPULATE_RECORD|JSONB_POPULATE_RECORD|JSON_POPULATE_RECORDSET|JSONB_POPULATE_RECORDSET|JSONB_PRETTY|ROW_TO_JSON|JSON_AGG|JSONB_AGG|JSON_OBJECT_AGG|JSONB_OBJECT_AGG|JSONB_PATH_EXISTS|JSONB_PATH_MATCH|JSONB_PATH_QUERY|JSONB_PATH_QUERY_ARRAY|JSONB_PATH_QUERY_FIRST|JSONB_PATH_EXISTS_TZ|JSONB_PATH_MATCH_TZ|JSONB_PATH_QUERY_TZ|JSONB_PATH_QUERY_ARRAY_TZ|JSONB_PATH_QUERY_FIRST_TZ)\\b\\s*(?=\\()',
         name: 'support.function.json.sql',
       },
       {
@@ -232,10 +227,6 @@ function pgsqlLang(): LanguageInput {
       {
         match: '(?i)\\b(FETCH|NEXT|PRIOR|FIRST|LAST|ABSOLUTE|RELATIVE|FROM|IN|CLOSE|OPEN|MOVE|DECLARE|SCROLL|NO\\s+SCROLL|WITH\\s+HOLD|WITHOUT\\s+HOLD|CURSOR|FOR)\\b',
         name: 'keyword.control.cursor.sql',
-      },
-      {
-        match: '(?i)\\b(ASC|DESC)\\b',
-        name: 'keyword.other.order.sql',
       },
       {
         match: '\\b\\d+\\b',
@@ -299,7 +290,7 @@ function pgsqlLang(): LanguageInput {
             name: 'string.quoted.double.sql',
           },
           {
-            begin: '(?i)E\'',
+            begin: "(?i)E'",
             beginCaptures: { '0': { name: 'punctuation.definition.string.begin.sql' } },
             end: "'",
             endCaptures: { '0': { name: 'punctuation.definition.string.end.sql' } },
@@ -323,39 +314,4 @@ function pgsqlLang(): LanguageInput {
       },
     },
   }
-}
-
-async function getHighlighter() {
-  if (highlighter.value) return highlighter.value
-  if (loading.value) {
-    return new Promise<Highlighter>((resolve) => {
-      const timer = setInterval(() => {
-        if (highlighter.value) {
-          clearInterval(timer)
-          resolve(highlighter.value)
-        }
-      }, 50)
-    })
-  }
-
-  loading.value = true
-  highlighter.value = await createHighlighter({
-    themes: [sqlTheme],
-    langs: [mysqlLang(), pgsqlLang()],
-  })
-  loading.value = false
-  return highlighter.value
-}
-
-export function useShiki() {
-  const highlightedMySQL = ref('')
-  const highlightedPostgreSQL = ref('')
-
-  async function highlight(mysql: string, postgresql: string) {
-    const h = await getHighlighter()
-    highlightedMySQL.value = h.codeToHtml(mysql, { lang: 'mysql', theme: 'sql-dark' })
-    highlightedPostgreSQL.value = h.codeToHtml(postgresql, { lang: 'pgsql', theme: 'sql-dark' })
-  }
-
-  return { highlightedMySQL, highlightedPostgreSQL, highlight }
 }
