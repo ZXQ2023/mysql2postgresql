@@ -177,22 +177,46 @@ SELECT B'1010' | B'1100';  -- 1110
 -- BIT VARYING 无长度上限`
 </script>
 
-<CodeCompare title="整数类型" description="TINYINT/SMALLINT/INT/BIGINT 映射" :mysql="intMysql" :postgresql="intPgsql" />
+<CodeCompare title="整数类型" description="TINYINT/SMALLINT/INT/BIGINT 映射" :mysql="intMysql" :postgresql="intPgsql">
+::: warning 注意：PostgreSQL 没有 TINYINT
+从 MySQL 迁移 `TINYINT` 时，需改用 PostgreSQL 的 `SMALLINT`（2 字节）。如果只需要存布尔值，建议直接用 `BOOLEAN` 类型。
+:::
+</CodeCompare>
 
-<CodeCompare title="字符串类型" description="VARCHAR / TEXT / CHAR 的差异" :mysql="strMysql" :postgresql="strPgsql" />
+<CodeCompare title="字符串类型" description="VARCHAR / TEXT / CHAR 的差异" :mysql="strMysql" :postgresql="strPgsql">
+::: tip PostgreSQL 中 TEXT 无长度限制
+MySQL 的 `TEXT`（64KB）、`MEDIUMTEXT`（16MB）、`LONGTEXT`（4GB）在 PostgreSQL 中统一对应 `TEXT`，且无长度限制。迁移时无需区分文本子类型。
+:::
+</CodeCompare>
 
 <CodeCompare title="布尔类型" :mysql="boolMysql" :postgresql="boolPgsql" />
 
-<CodeCompare title="自增主键" :mysql="autoMysql" :postgresql="autoPgsql" />
+<CodeCompare title="自增主键" :mysql="autoMysql" :postgresql="autoPgsql">
+::: info 推荐使用 IDENTITY 列
+`SERIAL` 是一种便捷语法，内部创建序列（SEQUENCE）。PostgreSQL 10+ 推荐使用 `GENERATED ALWAYS AS IDENTITY`，它符合 SQL 标准，且防止手动插入值。
+:::
+</CodeCompare>
 
-<CodeCompare title="枚举类型" :mysql="enumMysql" :postgresql="enumPgsql" />
+<CodeCompare title="枚举类型" :mysql="enumMysql" :postgresql="enumPgsql">
+::: warning ENUM 迁移建议
+MySQL 的 `ENUM` 直接对应 PostgreSQL 有两种方式：`CHECK` 约束或 `CREATE TYPE ... AS ENUM`。如果枚举值经常变动，建议使用 `CHECK` 约束搭配 `VARCHAR`，避免每次都要 `ALTER TYPE`。
+:::
+</CodeCompare>
 
 <CodeCompare title="数值类型" description="DECIMAL / FLOAT / DOUBLE 的差异" :mysql="decimalMysql" :postgresql="decimalPgsql" />
 
 <CodeCompare title="二进制类型" description="BLOB / BINARY / BYTEA 的映射" :mysql="binaryMysql" :postgresql="binaryPgsql" />
 
-<CodeCompare title="日期时间类型" description="DATE / TIME / DATETIME / TIMESTAMP" :mysql="dateMysql" :postgresql="datePgsql" />
+<CodeCompare title="日期时间类型" description="DATE / TIME / DATETIME / TIMESTAMP" :mysql="dateMysql" :postgresql="datePgsql">
+::: warning TIMESTAMP 2038 年问题
+MySQL 的 `TIMESTAMP` 使用 32 位整数存储，到 2038 年会溢出。PostgreSQL 的 `TIMESTAMP` 范围为 `4713 BC ~ 294276 AD`，不存在此问题。迁移时建议优先使用 `TIMESTAMPTZ`（带时区）。
+:::
+</CodeCompare>
 
-<CodeCompare title="UUID 类型" description="PostgreSQL 原生 UUID vs MySQL CHAR(36)" :mysql="uuidMysql" :postgresql="uuidPgsql" />
+<CodeCompare title="UUID 类型" description="PostgreSQL 原生 UUID vs MySQL CHAR(36)" :mysql="uuidMysql" :postgresql="uuidPgsql">
+::: tip PostgreSQL 原生 UUID 更高效
+PostgreSQL 的 `UUID` 类型以 128-bit（16 字节）存储，比 MySQL 的 `CHAR(36)`（36 字节）节省超过一半存储空间，且索引效率更高。PostgreSQL 13+ 可直接使用 `gen_random_uuid()`，无需安装扩展。
+:::
+</CodeCompare>
 
 <CodeCompare title="位类型" description="BIT 和位操作" :mysql="bitMysql" :postgresql="bitPgsql" />

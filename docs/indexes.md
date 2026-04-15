@@ -154,11 +154,19 @@ CREATE INDEX CONCURRENTLY idx_name
 DROP INDEX CONCURRENTLY idx_name;`
 </script>
 
-<CodeCompare title="B-Tree 索引" description="最基本的索引类型" :mysql="btreeMysql" :postgresql="btreePgsql" />
+<CodeCompare title="B-Tree 索引" description="最基本的索引类型" :mysql="btreeMysql" :postgresql="btreePgsql">
+::: tip PostgreSQL 支持表达式索引
+`CREATE INDEX idx_lower_email ON users (LOWER(email))` 可以直接在函数表达式上创建索引。MySQL 8.0+ 才支持函数索引（需双层括号）。这在实现大小写不敏感查询时非常有用。
+:::
+</CodeCompare>
 
 <CodeCompare title="复合索引与函数索引" :mysql="compositeMysql" :postgresql="compositePgsql" />
 
-<CodeCompare title="全文索引" description="全文搜索索引的创建与查询" :mysql="fulltextMysql" :postgresql="fulltextPgsql" />
+<CodeCompare title="全文索引" description="全文搜索索引的创建与查询" :mysql="fulltextMysql" :postgresql="fulltextPgsql">
+::: info 全文搜索实现方式完全不同
+MySQL 使用 `FULLTEXT INDEX` + `MATCH ... AGAINST` 语法，PostgreSQL 使用 `TSVECTOR` + `TSQUERY` + GIN 索引。PostgreSQL 的全文搜索功能更强大，支持权重、词典、多语言分词等，但学习曲线也更陡。
+:::
+</CodeCompare>
 
 <CodeCompare title="空间索引" description="地理空间数据的索引" :mysql="spatialMysql" :postgresql="spatialPgsql" />
 
@@ -168,4 +176,8 @@ DROP INDEX CONCURRENTLY idx_name;`
 
 <CodeCompare title="删除索引" :mysql="dropIndexMysql" :postgresql="dropIndexPgsql" />
 
-<CodeCompare title="并发索引操作" description="不锁表的索引创建与删除" :mysql="concurrentMysql" :postgresql="concurrentPgsql" />
+<CodeCompare title="并发索引操作" description="不锁表的索引创建与删除" :mysql="concurrentMysql" :postgresql="concurrentPgsql">
+::: warning CREATE INDEX CONCURRENTLY 不能在事务中运行
+`CREATE INDEX CONCURRENTLY` 会扫描表两次，耗时较长但**不会阻塞读写**。注意：此命令不能在事务块中执行，如果中途失败会留下 `INVALID` 状态的索引，需手动 `DROP INDEX` 清理。
+:::
+</CodeCompare>

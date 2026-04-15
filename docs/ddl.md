@@ -169,9 +169,17 @@ CREATE TEMPORARY TABLE temp_users (
 ) ON COMMIT DROP;  -- 事务结束删除`
 </script>
 
-<CodeCompare title="创建表" description="建表语法的差异, 包括自增、默认值、枚举等" :mysql="createTableMysql" :postgresql="createTablePgsql" />
+<CodeCompare title="创建表" description="建表语法的差异, 包括自增、默认值、枚举等" :mysql="createTableMysql" :postgresql="createTablePgsql">
+::: warning MySQL 的 ON UPDATE CURRENT_TIMESTAMP 需要用触发器替代
+PostgreSQL 没有 `ON UPDATE CURRENT_TIMESTAMP` 语法。需要在 PostgreSQL 中创建触发器函数来实现 `updated_at` 字段的自动更新。上面的 PostgreSQL 示例代码包含了完整的触发器实现。
+:::
+</CodeCompare>
 
-<CodeCompare title="添加列" description="ALTER TABLE ADD COLUMN 的差异" :mysql="addColumnMysql" :postgresql="addColumnPgsql" />
+<CodeCompare title="添加列" description="ALTER TABLE ADD COLUMN 的差异" :mysql="addColumnMysql" :postgresql="addColumnPgsql">
+::: warning PostgreSQL 不支持指定列的位置
+MySQL 的 `AFTER name` / `FIRST` 在 PostgreSQL 中不可用。PostgreSQL 的列总是按创建顺序排列。如果确实需要调整列顺序，需要重建表或创建视图。
+:::
+</CodeCompare>
 
 <CodeCompare title="修改列" description="修改列类型和列名" :mysql="modifyColumnMysql" :postgresql="modifyColumnPgsql" />
 
@@ -183,6 +191,10 @@ CREATE TEMPORARY TABLE temp_users (
 
 <CodeCompare title="表/列注释" description="COMMENT 语法的差异" :mysql="commentMysql" :postgresql="commentPgsql" />
 
-<CodeCompare title="清空表" description="TRUNCATE 的差异" :mysql="truncateMysql" :postgresql="truncatePgsql" />
+<CodeCompare title="清空表" description="TRUNCATE 的差异" :mysql="truncateMysql" :postgresql="truncatePgsql">
+::: tip PostgreSQL 的 TRUNCATE CASCADE
+使用 `TRUNCATE TABLE users CASCADE` 可以级联清空所有通过外键关联的表。这在 MySQL 中需要手动逐个清空（且需临时禁用外键检查），非常方便。
+:::
+</CodeCompare>
 
 <CodeCompare title="临时表" :mysql="tempTableMysql" :postgresql="tempTablePgsql" />

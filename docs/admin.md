@@ -227,16 +227,35 @@ FROM pg_stat_user_indexes;`
 
 <CodeCompare title="数据库管理" description="查看、创建、切换数据库" :mysql="showDbMysql" :postgresql="showDbPgsql" />
 
-<CodeCompare title="查看表结构" description="查看表和列的信息" :mysql="showTableMysql" :postgresql="showTablePgsql" />
+<CodeCompare title="查看表结构" description="查看表和列的信息" :mysql="showTableMysql" :postgresql="showTablePgsql">
+::: tip psql 反斜杠命令
+PostgreSQL 的 `psql` 客户端提供丰富的反斜杠命令：`\l`（列数据库）、`\dt`（列表）、`\d 表名`（看结构）、`\du`（列角色）、`\df`（列函数）。这些比写 SQL 查询方便得多。
+:::
+</CodeCompare>
 
 <CodeCompare title="创建数据库" description="CREATE DATABASE 的编码和排序设置" :mysql="createDbMysql" :postgresql="createDbPgsql" />
 
-<CodeCompare title="用户与权限" description="创建用户、授权、修改密码" :mysql="userMysql" :postgresql="userPgsql" />
+<CodeCompare title="用户与权限" description="创建用户、授权、修改密码" :mysql="userMysql" :postgresql="userPgsql">
+::: info PostgreSQL 用"角色"统一用户和组
+PostgreSQL 不区分"用户"和"组"，统一使用 `ROLE`。带 `LOGIN` 属性的角色等价于用户，不带 `LOGIN` 的等价于用户组。MySQL 的 `GRANT ... ON mydb.*` 在 PostgreSQL 中需要分别授予数据库和 schema 的权限。
+:::
+</CodeCompare>
 
 <CodeCompare title="备份与恢复" description="mysqldump vs pg_dump" :mysql="backupMysql" :postgresql="backupPgsql" />
 
-<CodeCompare title="连接管理" description="查看和终止数据库连接" :mysql="processMysql" :postgresql="processPgsql" />
+<CodeCompare title="连接管理" description="查看和终止数据库连接" :mysql="processMysql" :postgresql="processPgsql">
+::: warning pg_terminate_backend vs pg_cancel_backend
+- `pg_cancel_backend(pid)`：取消当前查询，但**不断开连接**
+- `pg_terminate_backend(pid)`：直接**断开连接**
 
-<CodeCompare title="配置管理" description="查看和修改数据库配置" :mysql="configMysql" :postgresql="configPgsql" />
+MySQL 的 `KILL` 对应 `pg_terminate_backend`，`KILL QUERY` 对应 `pg_cancel_backend`。
+:::
+</CodeCompare>
+
+<CodeCompare title="配置管理" description="查看和修改数据库配置" :mysql="configMysql" :postgresql="configPgsql">
+::: tip ALTER SYSTEM + pg_reload_conf()
+PostgreSQL 的 `ALTER SYSTEM SET` 命令将配置写入 `postgresql.auto.conf`，再配合 `pg_reload_conf()` 即可在不重启的情况下生效（仅限 `SET` 类参数）。比 MySQL 的 `SET GLOBAL` 更安全，不会因为意外重启而丢失配置。
+:::
+</CodeCompare>
 
 <CodeCompare title="存储大小" description="查看数据库和表的存储大小" :mysql="sizeMysql" :postgresql="sizePgsql" />

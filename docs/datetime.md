@@ -78,12 +78,33 @@ SELECT EXTRACT(
 );`
 </script>
 
-<CodeCompare title="获取当前时间" :mysql="nowMysql" :postgresql="nowPgsql" />
+<CodeCompare title="获取当前时间" :mysql="nowMysql" :postgresql="nowPgsql">
+::: warning PostgreSQL 时间函数带时区
+PostgreSQL 的 `NOW()` 返回值带时区偏移（如 `+08`），而 MySQL 不带。如果应用不处理时区，迁移后可能出现时间解析问题。建议统一使用 `TIMESTAMPTZ` 类型。
+:::
+</CodeCompare>
 
 <CodeCompare title="日期加减" :mysql="addMysql" :postgresql="addPgsql" />
 
-<CodeCompare title="日期格式化" :mysql="formatMysql" :postgresql="formatPgsql" />
+<CodeCompare title="日期格式化" :mysql="formatMysql" :postgresql="formatPgsql">
+::: danger 格式符完全不同
+MySQL 使用 `%Y-%m-%d` 风格（% 前缀），PostgreSQL 使用 `YYYY-MM-DD` 风格。这是迁移中最容易出错的地方之一，必须逐一对照转换。
+
+| 含义 | MySQL | PostgreSQL |
+|------|-------|------------|
+| 年 | `%Y` | `YYYY` |
+| 月 | `%m` | `MM` |
+| 日 | `%d` | `DD` |
+| 时 | `%H` | `HH24` |
+| 分 | `%i` | `MI` |
+| 秒 | `%s` | `SS` |
+:::
+</CodeCompare>
 
 <CodeCompare title="日期提取" :mysql="extractMysql" :postgresql="extractPgsql" />
 
-<CodeCompare title="日期差值" :mysql="diffMysql" :postgresql="diffPgsql" />
+<CodeCompare title="日期差值" :mysql="diffMysql" :postgresql="diffPgsql">
+::: tip PostgreSQL 的 AGE 函数更直观
+`AGE('2024-12-31', '2024-01-01')` 返回 `11 mons 30 days`，直接以人类可读的间隔形式展示日期差。MySQL 没有类似函数，只能用 `DATEDIFF` 获取天数差。
+:::
+</CodeCompare>

@@ -159,7 +159,11 @@ WINDOW w AS (
 );`
 </script>
 
-<CodeCompare title="ROW_NUMBER" description="窗口内排序编号" :mysql="rowNumberMysql" :postgresql="rowNumberPgsql" />
+<CodeCompare title="ROW_NUMBER" description="窗口内排序编号" :mysql="rowNumberMysql" :postgresql="rowNumberPgsql">
+::: warning MySQL 8.0+ 才支持窗口函数
+MySQL 8.0 之前的版本不支持窗口函数（`ROW_NUMBER`、`RANK`、`LAG` 等），需要用变量或自连接模拟。如果你的 MySQL 版本低于 8.0，迁移到 PostgreSQL 后窗口函数是最大的收益之一。
+:::
+</CodeCompare>
 
 <CodeCompare title="RANK / DENSE_RANK" description="排名函数" :mysql="rankMysql" :postgresql="rankPgsql" />
 
@@ -167,6 +171,10 @@ WINDOW w AS (
 
 <CodeCompare title="LEAD / LAG" description="访问前后行的值" :mysql="leadLagMysql" :postgresql="leadLagPgsql" />
 
-<CodeCompare title="FIRST_VALUE / LAST_VALUE" description="窗口内首尾值" :mysql="firstLastMysql" :postgresql="firstLastPgsql" />
+<CodeCompare title="FIRST_VALUE / LAST_VALUE" description="窗口内首尾值" :mysql="firstLastMysql" :postgresql="firstLastPgsql">
+::: warning LAST_VALUE 的窗口帧陷阱
+`LAST_VALUE()` 默认的窗口帧是 `ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW`，这意味着它只取"到当前行为止"的最后一条，而非整个分区的最后一条。需要显式指定 `ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING` 才能得到正确结果。
+:::
+</CodeCompare>
 
 <CodeCompare title="命名窗口" description="WINDOW 子句复用窗口定义" :mysql="namedWindowMysql" :postgresql="namedWindowPgsql" />

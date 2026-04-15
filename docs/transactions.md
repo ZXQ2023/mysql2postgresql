@@ -170,12 +170,30 @@ SET lock_timeout = '10s';`
 
 <CodeCompare title="基本事务" description="BEGIN / COMMIT / ROLLBACK / SAVEPOINT" :mysql="basicMysql" :postgresql="basicPgsql" />
 
-<CodeCompare title="隔离级别" description="事务隔离级别的查看和设置" :mysql="isolationMysql" :postgresql="isolationPgsql" />
+<CodeCompare title="隔离级别" description="事务隔离级别的查看和设置" :mysql="isolationMysql" :postgresql="isolationPgsql">
+::: warning 默认隔离级别不同
+- MySQL 默认隔离级别：**REPEATABLE READ**（可重复读）
+- PostgreSQL 默认隔离级别：**READ COMMITTED**（读已提交）
+
+此外，PostgreSQL 不支持 READ UNCOMMITTED（脏读），设置后实际行为等同于 READ COMMITTED。
+:::
+</CodeCompare>
 
 <CodeCompare title="行锁" description="FOR UPDATE / FOR SHARE 等行级锁" :mysql="lockMysql" :postgresql="lockPgsql" />
 
-<CodeCompare title="表锁" description="表级别的锁定机制" :mysql="tableLockMysql" :postgresql="tableLockPgsql" />
+<CodeCompare title="表锁" description="表级别的锁定机制" :mysql="tableLockMysql" :postgresql="tableLockPgsql">
+::: info PostgreSQL 的咨询锁
+`pg_advisory_lock()` 提供应用级别的分布式锁机制，不依赖表数据，非常适合实现分布式互斥。MySQL 没有类似的内置机制，通常需要借助 Redis 等外部工具。
+:::
+</CodeCompare>
 
 <CodeCompare title="自动提交" :mysql="autoCommitMysql" :postgresql="autoCommitPgsql" />
 
-<CodeCompare title="死锁处理" description="死锁检测与锁等待超时" :mysql="deadlockMysql" :postgresql="deadlockPgsql" />
+<CodeCompare title="死锁处理" description="死锁检测与锁等待超时" :mysql="deadlockMysql" :postgresql="deadlockPgsql">
+::: warning 超时单位不同
+- MySQL 的 `innodb_lock_wait_timeout` 单位是**秒**，默认 50 秒
+- PostgreSQL 的 `deadlock_timeout` 单位是**毫秒**（如 `'1s'`），`lock_timeout` 也是毫秒
+
+迁移配置时注意换算单位。
+:::
+</CodeCompare>

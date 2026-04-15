@@ -88,12 +88,24 @@ SELECT LOWER('HELLO');  -- hello
 SELECT INITCAP('hello world'); -- Hello World`
 </script>
 
-<CodeCompare title="字符串拼接" :mysql="concatMysql" :postgresql="concatPgsql" />
+<CodeCompare title="字符串拼接" :mysql="concatMysql" :postgresql="concatPgsql">
+::: tip PostgreSQL 推荐使用 || 拼接
+PostgreSQL 中 `||` 是标准的字符串拼接运算符。MySQL 中 `||` 默认是逻辑 OR（需设置 `PIPES_AS_CONCAT` 模式才变为拼接）。迁移时建议统一使用 `||` 或 `CONCAT()` 函数。
+:::
+</CodeCompare>
 
 <CodeCompare title="字符串截取" :mysql="substrMysql" :postgresql="substrPgsql" />
 
-<CodeCompare title="正则表达式" :mysql="regexMysql" :postgresql="regexPgsql" />
+<CodeCompare title="正则表达式" :mysql="regexMysql" :postgresql="regexPgsql">
+::: info 正则语法差异
+PostgreSQL 使用 `~` 运算符进行正则匹配（`~` 区分大小写，`~*` 不区分），MySQL 使用 `REGEXP` 关键字。此外，PostgreSQL 的 `REGEXP_REPLACE` 默认只替换第一个匹配，需要加 `'g'` 标志才能全局替换。
+:::
+</CodeCompare>
 
 <CodeCompare title="字符串搜索" :mysql="searchMysql" :postgresql="searchPgsql" />
 
-<CodeCompare title="大小写转换" :mysql="caseMysql" :postgresql="casePgsql" />
+<CodeCompare title="大小写转换" :mysql="caseMysql" :postgresql="casePgsql">
+::: tip PostgreSQL 独有的 INITCAP
+`INITCAP('hello world')` 返回 `Hello World`，将每个单词首字母大写。MySQL 没有对应函数，需要用 `CONCAT(UPPER(SUBSTRING(...))), ...)` 组合实现。
+:::
+</CodeCompare>

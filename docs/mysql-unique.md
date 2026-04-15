@@ -298,16 +298,28 @@ $$;`
 
 <CodeCompare title="AUTO_INCREMENT 高级用法" description="MySQL 更灵活的自增控制" :mysql="autoIncMysql" :postgresql="autoIncPgsql" />
 
-<CodeCompare title="存储引擎" description="MySQL 多引擎 vs PostgreSQL 单一存储" :mysql="storageEngineMysql" :postgresql="storageEnginePgsql" />
+<CodeCompare title="存储引擎" description="MySQL 多引擎 vs PostgreSQL 单一存储" :mysql="storageEngineMysql" :postgresql="storageEnginePgsql">
+::: info PostgreSQL 没有存储引擎概念
+MySQL 可以选择 InnoDB、MyISAM、Memory 等存储引擎，不同引擎特性差异大。PostgreSQL 使用统一的存储层，所有表行为一致。PostgreSQL 的 `UNLOGGED` 表类似 MySQL 的 Memory 引擎（崩溃后数据丢失），但性能提升有限。
+:::
+</CodeCompare>
 
 <CodeCompare title="SQL 模式" description="MySQL 可配置的 SQL 行为" :mysql="sqlModeMysql" :postgresql="sqlModePgsql" />
 
 <CodeCompare title="延迟/优先级写入" description="INSERT DELAYED / LOW_PRIORITY" :mysql="insertDelayedMysql" :postgresql="insertDelayedPgsql" />
 
-<CodeCompare title="ON UPDATE 时间戳" description="MySQL 自动更新时间戳" :mysql="onUpdateMysql" :postgresql="onUpdatePgsql" />
+<CodeCompare title="ON UPDATE 时间戳" description="MySQL 自动更新时间戳" :mysql="onUpdateMysql" :postgresql="onUpdatePgsql">
+::: warning ON UPDATE CURRENT_TIMESTAMP 必须用触发器替代
+MySQL 的 `ON UPDATE CURRENT_TIMESTAMP` 是迁移到 PostgreSQL 最常见的痛点之一。需要在 PostgreSQL 中创建触发器函数和触发器来实现。上面的示例代码可以直接复用。
+:::
+</CodeCompare>
 
 <CodeCompare title="查询提示" description="FORCE INDEX / IGNORE INDEX" :mysql="queryHintMysql" :postgresql="queryHintPgsql" />
 
 <CodeCompare title="细粒度权限" description="列级权限和代理用户" :mysql="splitPrivilegeMysql" :postgresql="splitPrivilegePgsql" />
 
-<CodeCompare title="用户变量" description="@变量 vs 替代方案" :mysql="userVarMysql" :postgresql="userVarPgsql" />
+<CodeCompare title="用户变量" description="@变量 vs 替代方案" :mysql="userVarMysql" :postgresql="userVarPgsql">
+::: warning MySQL 用户变量需要重构
+MySQL 的 `@变量` 在查询中可以跨语句保持状态（如 `@rank := @rank + 1`）。PostgreSQL 没有等价功能，迁移时需要改用窗口函数（`ROW_NUMBER()`）、CTE 或 `current_setting()` 自定义参数来替代。
+:::
+</CodeCompare>

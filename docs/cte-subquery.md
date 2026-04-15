@@ -175,11 +175,19 @@ WHERE dept_avg.avg_salary > 50000;`
 
 <CodeCompare title="IN / EXISTS 子查询" :mysql="inSubMysql" :postgresql="inSubPgsql" />
 
-<CodeCompare title="基本 CTE" description="WITH 子句公用表表达式" :mysql="basicCteMysql" :postgresql="basicCtePgsql" />
+<CodeCompare title="基本 CTE" description="WITH 子句公用表表达式" :mysql="basicCteMysql" :postgresql="basicCtePgsql">
+::: info CTE 优化行为不同
+MySQL 8.0 的 CTE 总是物化（先计算后存储为临时表）。PostgreSQL 12+ 默认将 CTE 内联优化（像子查询一样处理），除非被引用多次或使用 `MATERIALIZED` 关键字。如果需要物化，使用 `WITH cte AS MATERIALIZED (...)`。
+:::
+</CodeCompare>
 
 <CodeCompare title="多个 CTE" description="WITH 多个命名查询" :mysql="multiCteMysql" :postgresql="multiCtePgsql" />
 
-<CodeCompare title="递归 CTE" description="WITH RECURSIVE 实现树形查询" :mysql="recursiveCteMysql" :postgresql="recursiveCtePgsql" />
+<CodeCompare title="递归 CTE" description="WITH RECURSIVE 实现树形查询" :mysql="recursiveCteMysql" :postgresql="recursiveCtePgsql">
+::: tip 递归 CTE 是处理树形数据的利器
+递归 CTE 可以优雅地处理组织架构、评论树、文件目录等层级数据。PostgreSQL 还支持在递归 CTE 中使用 `CYCLE` 检测循环引用（PostgreSQL 14+），避免无限递归。
+:::
+</CodeCompare>
 
 <CodeCompare title="LATERAL" description="横向关联子查询" :mysql="lateralMysql" :postgresql="lateralPgsql" />
 

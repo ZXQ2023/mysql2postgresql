@@ -160,7 +160,11 @@ SELECT 7 % 2;     -- 1
 SELECT MOD(7, 2);  -- 1`
 </script>
 
-<CodeCompare title="比较运算符" description="等于、不等于、NULL 安全比较" :mysql="comparisonMysql" :postgresql="comparisonPgsql" />
+<CodeCompare title="比较运算符" description="等于、不等于、NULL 安全比较" :mysql="comparisonMysql" :postgresql="comparisonPgsql">
+::: info NULL 安全比较
+MySQL 的 `<=>` 运算符用于 NULL 安全比较（`NULL <=> NULL` 返回 1）。PostgreSQL 中对应的是 `IS NOT DISTINCT FROM`，语义相同但写法更长。也可用 `IS DISTINCT FROM` 来判断两个值是否"不同"（包括 NULL）。
+:::
+</CodeCompare>
 
 <CodeCompare title="逻辑运算符" :mysql="logicalMysql" :postgresql="logicalPgsql" />
 
@@ -168,10 +172,21 @@ SELECT MOD(7, 2);  -- 1`
 
 <CodeCompare title="IN / NOT IN" :mysql="inOpMysql" :postgresql="inOpPgsql" />
 
-<CodeCompare title="LIKE / 模式匹配" description="模糊匹配及大小写敏感" :mysql="likeMysql" :postgresql="likePgsql" />
+<CodeCompare title="LIKE / 模式匹配" description="模糊匹配及大小写敏感" :mysql="likeMysql" :postgresql="likePgsql">
+::: tip PostgreSQL 原生支持 ILIKE
+PostgreSQL 的 `ILIKE` 运算符提供不区分大小写的模糊匹配，MySQL 没有等价语法，只能用 `LOWER(name) LIKE LOWER('John%')` 变通。
+:::
+</CodeCompare>
 
 <CodeCompare title="IS 运算符" description="IS NULL / IS DISTINCT FROM" :mysql="isMysql" :postgresql="isPgsql" />
 
-<CodeCompare title="字符串拼接运算符" description="|| 运算符的行为差异" :mysql="concatOpMysql" :postgresql="concatOpPgsql" />
+<CodeCompare title="字符串拼接运算符" description="|| 运算符的行为差异" :mysql="concatOpMysql" :postgresql="concatOpPgsql">
+::: danger || 运算符含义完全不同
+- **MySQL**：`||` 默认是逻辑 OR 运算符，`'Hello' || ' World'` 结果为 `0`
+- **PostgreSQL**：`||` 是字符串拼接运算符，`'Hello' || ' World'` 结果为 `'Hello World'`
+
+迁移时务必注意此差异！
+:::
+</CodeCompare>
 
 <CodeCompare title="算术运算符" description="除法和取模" :mysql="divisionMysql" :postgresql="divisionPgsql" />

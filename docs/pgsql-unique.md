@@ -323,20 +323,53 @@ CREATE DOMAIN positive_int AS INTEGER
   CHECK (VALUE > 0);`
 </script>
 
-<CodeCompare title="数组类型" description="PostgreSQL 原生数组 vs MySQL JSON 模拟" :mysql="arrayMysql" :postgresql="arrayPgsql" />
+<CodeCompare title="数组类型" description="PostgreSQL 原生数组 vs MySQL JSON 模拟" :mysql="arrayMysql" :postgresql="arrayPgsql">
+::: tip PostgreSQL 数组类型是迁移的一大收益
+使用原生数组可以避免 MySQL 中用 JSON 或逗号分隔字符串模拟数组的各种痛点。数组支持 GIN 索引、`ANY`/`@>`/`&&` 等操作符，查询性能和表达能力远超 MySQL 的 `FIND_IN_SET`。
+:::
+</CodeCompare>
 
 <CodeCompare title="JSONB 深度对比" description="PostgreSQL JSONB 比 MySQL JSON 更强大" :mysql="jsonbMysql" :postgresql="jsonbPgsql" />
 
-<CodeCompare title="范围类型" description="PostgreSQL 原生范围类型及约束" :mysql="rangeMysql" :postgresql="rangePgsql" />
+<CodeCompare title="范围类型" description="PostgreSQL 原生范围类型及约束" :mysql="rangeMysql" :postgresql="rangePgsql">
+::: tip 范围类型的排除约束
+`EXCLUDE USING GIST (during WITH &&)` 可以在数据库层面防止时间范围重叠，无需应用层检查。这对会议室预订、排班系统等场景极其有用。
+:::
+</CodeCompare>
 
 <CodeCompare title="DISTINCT ON" description="PostgreSQL 独有的分组取首条语法" :mysql="distinctOnMysql" :postgresql="distinctOnPgsql" />
 
-<CodeCompare title="RETURNING 子句" description="INSERT/UPDATE/DELETE 时返回数据" :mysql="returningMysql" :postgresql="returningPgsql" />
+<CodeCompare title="RETURNING 子句" description="INSERT/UPDATE/DELETE 时返回数据" :mysql="returningMysql" :postgresql="returningPgsql">
+::: tip RETURNING 减少一次额外的查询
+MySQL 插入后需要 `SELECT LAST_INSERT_ID()` 或再查一次才能获取数据。PostgreSQL 的 `RETURNING *` 一次操作即可返回所有受影响的行，在 ORM 和应用代码中更简洁高效。
+:::
+</CodeCompare>
 
-<CodeCompare title="UPSERT" description="INSERT ON DUPLICATE KEY UPDATE vs ON CONFLICT" :mysql="upsertMysql" :postgresql="upsertPgsql" />
+<CodeCompare title="UPSERT" description="INSERT ON DUPLICATE KEY UPDATE vs ON CONFLICT" :mysql="upsertMysql" :postgresql="upsertPgsql">
+::: warning UPSERT 语法差异
+- MySQL：`ON DUPLICATE KEY UPDATE`，冲突判断基于所有唯一约束
+- PostgreSQL：`ON CONFLICT (列名)`，可以精确指定冲突目标列，更灵活
 
-<CodeCompare title="物化视图" description="PostgreSQL 原生物化视图" :mysql="materializedViewMysql" :postgresql="materializedViewPgsql" />
+PostgreSQL 的 `EXCLUDED` 表引用包含拟插入的行数据，等价于 MySQL 的 `VALUES()` 函数。
+:::
+</CodeCompare>
 
-<CodeCompare title="扩展系统" description="CREATE EXTENSION 热加载扩展" :mysql="extensionMysql" :postgresql="extensionPgsql" />
+<CodeCompare title="物化视图" description="PostgreSQL 原生物化视图" :mysql="materializedViewMysql" :postgresql="materializedViewPgsql">
+::: info 物化视图适合报表场景
+物化视图将查询结果持久化存储，适合不要求实时但计算代价高的报表查询。`REFRESH MATERIALIZED VIEW CONCURRENTLY` 可以在不锁表的情况下刷新数据，允许读写并行。
+:::
+</CodeCompare>
+
+<CodeCompare title="扩展系统" description="CREATE EXTENSION 热加载扩展" :mysql="extensionMysql" :postgresql="extensionPgsql">
+::: details 常用 PostgreSQL 扩展推荐
+- **postgis**：地理空间数据（点、线、面、距离计算）
+- **pg_trgm**：模糊搜索（`LIKE '%keyword%'` 也能走索引）
+- **pgcrypto**：加密函数（`gen_random_uuid()`、`crypt()` 等）
+- **hstore**：键值对存储（类似简化的 JSONB）
+- **btree_gin / btree_gist**：复合索引支持
+- **uuid-ossp**：UUID 生成函数（PG 13+ 已内置 `gen_random_uuid()`）
+- **pg_stat_statements**：SQL 性能追踪和分析
+:::
+</CodeCompare>
 
 <CodeCompare title="自定义类型" description="复合类型、域类型" :mysql="customTypeMysql" :postgresql="customTypePgsql" />

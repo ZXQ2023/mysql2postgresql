@@ -92,12 +92,27 @@ CREATE INDEX idx_category
 ON products ((data->>'category'));`
 </script>
 
-<CodeCompare title="JSON 列定义" :mysql="defMysql" :postgresql="defPgsql" />
+<CodeCompare title="JSON 列定义" :mysql="defMysql" :postgresql="defPgsql">
+::: tip 优先使用 JSONB 而非 JSON
+PostgreSQL 的 `JSONB` 以二进制格式存储，查询时不需要重新解析，支持 GIN 索引，性能远优于 `JSON` 类型。除非有特殊需求（如保留键顺序），迁移时一律建议使用 `JSONB`。
+:::
+</CodeCompare>
 
-<CodeCompare title="提取 JSON 字段" :mysql="extractMysql" :postgresql="extractPgsql" />
+<CodeCompare title="提取 JSON 字段" :mysql="extractMysql" :postgresql="extractPgsql">
+::: warning JSON 路径语法不同
+- MySQL 使用 `$.name` 的 dollar 符号路径语法
+- PostgreSQL 直接使用 `'name'` 或 `'{key1,key2}'` 的路径语法
+
+这是 JSON 操作迁移中最容易出错的地方。
+:::
+</CodeCompare>
 
 <CodeCompare title="JSON 查询条件" :mysql="queryMysql" :postgresql="queryPgsql" />
 
 <CodeCompare title="修改 JSON" :mysql="modifyMysql" :postgresql="modifyPgsql" />
 
-<CodeCompare title="JSON 索引" :mysql="indexMysql" :postgresql="indexPgsql" />
+<CodeCompare title="JSON 索引" :mysql="indexMysql" :postgresql="indexPgsql">
+::: info GIN 索引让 JSONB 查询飞起来
+在 PostgreSQL 中为 `JSONB` 列创建 GIN 索引后，`@>`（包含）、`?`（键存在）等操作符可以走索引扫描，查询性能可提升数十倍。MySQL 的 JSON 索引支持相对有限。
+:::
+</CodeCompare>

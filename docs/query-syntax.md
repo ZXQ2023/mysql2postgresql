@@ -255,24 +255,50 @@ EXPLAIN (ANALYZE, BUFFERS, VERBOSE)
 SELECT * FROM users WHERE id = 1;`
 </script>
 
-<CodeCompare title="字符串引号" description="MySQL 支持单引号和双引号, PostgreSQL 严格区分" :mysql="quotesMysql" :postgresql="quotesPgsql" />
+<CodeCompare title="字符串引号" description="MySQL 支持单引号和双引号, PostgreSQL 严格区分" :mysql="quotesMysql" :postgresql="quotesPgsql">
+::: danger 引号差异是迁移最常见的坑
+- MySQL 中双引号 `"hello"` 可以用于字符串，但 PostgreSQL 中双引号是**标识符**引用（表名、列名）
+- PostgreSQL 中字符串**必须**用单引号 `'hello'`
+- 如果表名/列名是保留字或含大写，PostgreSQL 中用双引号 `"TableName"` 包裹
+:::
+</CodeCompare>
 
 <CodeCompare title="LIMIT 与 OFFSET" description="分页语法的差异" :mysql="limitMysql" :postgresql="limitPgsql" />
 
 <CodeCompare title="IFNULL vs COALESCE" description="空值处理函数" :mysql="ifnullMysql" :postgresql="ifnullPgsql" />
 
-<CodeCompare title="GROUP_CONCAT vs STRING_AGG" description="行转字符串聚合" :mysql="groupConcatMysql" :postgresql="groupConcatPgsql" />
+<CodeCompare title="GROUP_CONCAT vs STRING_AGG" description="行转字符串聚合" :mysql="groupConcatMysql" :postgresql="groupConcatPgsql">
+::: warning 注意参数顺序不同
+MySQL 的 `GROUP_CONCAT(name SEPARATOR ', ')` vs PostgreSQL 的 `STRING_AGG(name, ', ')`。PostgreSQL 中分隔符是第二个参数，且 `ORDER BY` 写在 `STRING_AGG` 内部。
+:::
+</CodeCompare>
 
-<CodeCompare title="类型转换" :mysql="castMysql" :postgresql="castPgsql" />
+<CodeCompare title="类型转换" :mysql="castMysql" :postgresql="castPgsql">
+::: tip PostgreSQL 的 :: 简写
+`'123'::INTEGER` 是 PostgreSQL 特有的类型转换简写，等价于 `CAST('123' AS INTEGER)`。PostgreSQL 的类型转换比 MySQL 严格得多，隐式转换较少，建议养成显式转换的习惯。
+:::
+</CodeCompare>
 
 <CodeCompare title="JOIN 连接" description="连接查询语法的差异" :mysql="joinMysql" :postgresql="joinPgsql" />
 
 <CodeCompare title="集合操作" description="UNION / INTERSECT / EXCEPT" :mysql="unionMysql" :postgresql="unionPgsql" />
 
-<CodeCompare title="INSERT 语句" description="插入数据的语法差异" :mysql="insertMysql" :postgresql="insertPgsql" />
+<CodeCompare title="INSERT 语句" description="插入数据的语法差异" :mysql="insertMysql" :postgresql="insertPgsql">
+::: info PostgreSQL 的 RETURNING 子句
+PostgreSQL 支持 `RETURNING` 子句，可以在 `INSERT`/`UPDATE`/`DELETE` 后直接返回受影响的行数据，无需额外查询。这是 MySQL 不具备的便利功能。
+:::
+</CodeCompare>
 
-<CodeCompare title="UPDATE 语句" description="更新数据的语法差异" :mysql="updateMysql" :postgresql="updatePgsql" />
+<CodeCompare title="UPDATE 语句" description="更新数据的语法差异" :mysql="updateMysql" :postgresql="updatePgsql">
+::: warning 多表 UPDATE 语法不同
+MySQL 的 `UPDATE ... JOIN ... SET` 在 PostgreSQL 中要改写为 `UPDATE ... FROM ... WHERE`。注意 PostgreSQL 中 WHERE 条件不能遗漏，否则会更新所有行。
+:::
+</CodeCompare>
 
-<CodeCompare title="DELETE 语句" description="删除数据的语法差异" :mysql="deleteMysql" :postgresql="deletePgsql" />
+<CodeCompare title="DELETE 语句" description="删除数据的语法差异" :mysql="deleteMysql" :postgresql="deletePgsql">
+::: warning 多表 DELETE 用 USING 代替 JOIN
+MySQL 的 `DELETE u, o FROM users u JOIN orders o ...` 在 PostgreSQL 中要改写为 `DELETE FROM users USING orders o WHERE ...`。注意 PostgreSQL 不支持同时删除多张表的数据。
+:::
+</CodeCompare>
 
 <CodeCompare title="EXPLAIN 执行计划" description="查看查询执行计划" :mysql="explainMysql" :postgresql="explainPgsql" />

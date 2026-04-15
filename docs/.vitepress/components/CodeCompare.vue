@@ -56,6 +56,9 @@ watch(() => [props.mysql, props.postgresql], highlight)
         <div class="code-wrapper" v-html="pgsqlHtml" />
       </div>
     </div>
+    <div v-if="$slots.default" class="compare-note">
+      <slot />
+    </div>
   </div>
 </template>
 
@@ -137,5 +140,13 @@ watch(() => [props.mysql, props.postgresql], highlight)
   font-family: inherit;
   font-size: inherit;
   line-height: inherit;
+}
+.compare-note {
+  margin-top: 12px;
+  font-size: 14px;
+  line-height: 1.7;
+}
+.compare-note :deep(.custom-block) {
+  margin-top: 0;
 }
 </style>

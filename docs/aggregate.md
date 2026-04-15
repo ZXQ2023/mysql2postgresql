@@ -186,10 +186,18 @@ ORDER BY department, salary DESC;
 
 <CodeCompare title="条件表达式" description="IF / CASE WHEN" :mysql="ifCaseMysql" :postgresql="ifCasePgsql" />
 
-<CodeCompare title="条件聚合" description="带条件的计数/求和" :mysql="conditionAggMysql" :postgresql="conditionAggPgsql" />
+<CodeCompare title="条件聚合" description="带条件的计数/求和" :mysql="conditionAggMysql" :postgresql="conditionAggPgsql">
+::: tip PostgreSQL 的 FILTER 语法更优雅
+`COUNT(*) FILTER (WHERE status = 'active')` 比 `SUM(CASE WHEN ... THEN 1 ELSE 0 END)` 更简洁、可读性更强。这是 PostgreSQL 独有的标准扩展语法。
+:::
+</CodeCompare>
 
 <CodeCompare title="NULL 处理" description="IFNULL / COALESCE / NULLIF" :mysql="nullHandlingMysql" :postgresql="nullHandlingPgsql" />
 
 <CodeCompare title="HAVING 子句" :mysql="havingMysql" :postgresql="havingPgsql" />
 
-<CodeCompare title="DISTINCT" description="去重查询, PostgreSQL 额外支持 DISTINCT ON" :mysql="distinctMysql" :postgresql="distinctPgsql" />
+<CodeCompare title="DISTINCT" description="去重查询, PostgreSQL 额外支持 DISTINCT ON" :mysql="distinctMysql" :postgresql="distinctPgsql">
+::: tip DISTINCT ON 非常实用
+`DISTINCT ON (department)` 可以取每个分组的第一条记录，配合 `ORDER BY` 可以轻松实现"每个部门薪资最高的人"。MySQL 需要用窗口函数或子查询才能实现相同效果。
+:::
+</CodeCompare>
