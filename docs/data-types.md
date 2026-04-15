@@ -67,6 +67,114 @@ CREATE TYPE user_status AS ENUM (
 CREATE TABLE users (
   status user_status
 );`
+
+const decimalMysql = `-- 定点数
+DECIMAL(10, 2)  -- 精确小数
+NUMERIC(10, 2)  -- DECIMAL 的别名
+
+-- 浮点数
+FLOAT           -- 4字节单精度
+DOUBLE          -- 8字节双精度
+DOUBLE PRECISION -- DOUBLE 的别名`
+
+const decimalPgsql = `-- 定点数
+DECIMAL(10, 2)  -- 精确小数
+NUMERIC(10, 2)  -- 与 DECIMAL 完全相同
+
+-- 浮点数
+REAL             -- 4字节单精度
+DOUBLE PRECISION -- 8字节双精度
+-- 注意: PostgreSQL 没有 FLOAT/DOUBLE 关键字
+-- FLOAT(n) 可用, n<=24 为 REAL, 否则 DOUBLE`
+
+const binaryMysql = `-- 二进制类型
+BINARY(16)     -- 定长二进制
+VARBINARY(255) -- 变长二进制
+BLOB           -- 二进制大对象 (64KB)
+MEDIUMBLOB     -- 中等 (16MB)
+LONGBLOB       -- 长二进制 (4GB)`
+
+const binaryPgsql = `-- 二进制类型
+BYTEA           -- 变长二进制 (无限制)
+-- 没有 BINARY / VARBINARY
+-- 没有 BLOB 类型区分
+
+-- 存储二进制数据
+INSERT INTO files (data)
+VALUES (E'\\\\x' || encode('\\x deadbeef', 'hex'));
+
+-- 或用 pg_read_file 等函数`
+
+const dateMysql = `-- 日期类型
+DATE          -- YYYY-MM-DD
+TIME          -- HH:MM:SS
+DATETIME      -- YYYY-MM-DD HH:MM:SS
+TIMESTAMP     -- 时间戳 (2038年限制)
+YEAR          -- YYYY (1字节)`
+
+const datePgsql = `-- 日期类型
+DATE              -- YYYY-MM-DD
+TIME              -- HH:MM:SS
+TIMESTAMP         -- 时间戳 (更广范围)
+TIMESTAMPTZ       -- 带时区的时间戳
+TIMESTAMP WITH TIME ZONE -- 同上
+
+-- PostgreSQL 没有 DATETIME / YEAR
+-- 使用 TIMESTAMP 替代 DATETIME
+-- 使用 EXTRACT(YEAR FROM date) 替代 YEAR`
+
+const uuidMysql = `-- MySQL 没有 UUID 类型
+-- 使用 CHAR(36) 或 BINARY(16)
+
+CREATE TABLE users (
+  id CHAR(36) PRIMARY KEY
+);
+
+-- 生成 UUID (MySQL 8.0+)
+INSERT INTO users (id)
+VALUES (UUID());
+
+-- 或用函数
+SELECT UUID();
+-- '550e8400-e29b-41d4-a716-446655440000'`
+
+const uuidPgsql = `-- PostgreSQL 原生 UUID 类型 (需扩展)
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+CREATE TABLE users (
+  id UUID PRIMARY KEY
+    DEFAULT uuid_generate_v4()
+);
+
+-- 或使用 gen_random_uuid() (PG 13+)
+CREATE TABLE users (
+  id UUID PRIMARY KEY
+    DEFAULT gen_random_uuid()
+);
+
+-- UUID 存储: 128-bit (16字节)
+-- 比 CHAR(36) 更高效`
+
+const bitMysql = `-- 位类型
+BIT(1)       -- 1 位
+BIT(8)       -- 8 位
+BIT(64)      -- 最多 64 位
+
+-- 位操作
+SELECT b'1010' & b'1100';  -- 1000
+SELECT b'1010' | b'1100';  -- 1110`
+
+const bitPgsql = `-- 位类型
+BIT(1)       -- 1 位 (定长)
+BIT(8)       -- 8 位
+BIT VARYING(64) -- 变长位串 (无限)
+
+-- 位操作
+SELECT B'1010' & B'1100';  -- 1000
+SELECT B'1010' | B'1100';  -- 1110
+
+-- PostgreSQL 位串支持更灵活
+-- BIT VARYING 无长度上限`
 </script>
 
 <CodeCompare title="整数类型" description="TINYINT/SMALLINT/INT/BIGINT 映射" :mysql="intMysql" :postgresql="intPgsql" />
@@ -78,3 +186,13 @@ CREATE TABLE users (
 <CodeCompare title="自增主键" :mysql="autoMysql" :postgresql="autoPgsql" />
 
 <CodeCompare title="枚举类型" :mysql="enumMysql" :postgresql="enumPgsql" />
+
+<CodeCompare title="数值类型" description="DECIMAL / FLOAT / DOUBLE 的差异" :mysql="decimalMysql" :postgresql="decimalPgsql" />
+
+<CodeCompare title="二进制类型" description="BLOB / BINARY / BYTEA 的映射" :mysql="binaryMysql" :postgresql="binaryPgsql" />
+
+<CodeCompare title="日期时间类型" description="DATE / TIME / DATETIME / TIMESTAMP" :mysql="dateMysql" :postgresql="datePgsql" />
+
+<CodeCompare title="UUID 类型" description="PostgreSQL 原生 UUID vs MySQL CHAR(36)" :mysql="uuidMysql" :postgresql="uuidPgsql" />
+
+<CodeCompare title="位类型" description="BIT 和位操作" :mysql="bitMysql" :postgresql="bitPgsql" />

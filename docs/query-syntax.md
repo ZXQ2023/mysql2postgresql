@@ -84,6 +84,175 @@ SELECT '123'::INTEGER;
 
 -- 隐式转换更严格
 SELECT '123'::INTEGER + 0;  -- 必须显式转换`
+
+const joinMysql = `-- 标准连接 (相同)
+SELECT u.name, o.amount
+FROM users u
+INNER JOIN orders o ON u.id = o.user_id;
+
+LEFT JOIN / RIGHT JOIN / CROSS JOIN
+-- 与标准 SQL 相同
+
+-- STRAIGHT_JOIN (MySQL 专有)
+SELECT * FROM users
+STRAIGHT_JOIN orders ON users.id = orders.user_id;`
+
+const joinPgsql = `-- 标准连接 (相同)
+SELECT u.name, o.amount
+FROM users u
+INNER JOIN orders o ON u.id = o.user_id;
+
+LEFT JOIN / RIGHT JOIN / CROSS JOIN
+-- 与标准 SQL 相同
+
+-- NATURAL JOIN
+SELECT * FROM users
+NATURAL JOIN orders;
+
+-- PostgreSQL 没有 STRAIGHT_JOIN`
+
+const unionMysql = `-- UNION / UNION ALL
+SELECT name FROM users
+UNION
+SELECT name FROM admins;
+
+-- UNION ALL (不去重, 更快)
+SELECT name FROM users
+UNION ALL
+SELECT name FROM admins;`
+
+const unionPgsql = `-- UNION / UNION ALL
+SELECT name FROM users
+UNION
+SELECT name FROM admins;
+
+-- UNION ALL (不去重, 更快)
+SELECT name FROM users
+UNION ALL
+SELECT name FROM admins;
+
+-- INTERSECT (交集)
+SELECT name FROM users
+INTERSECT
+SELECT name FROM admins;
+
+-- EXCEPT (差集)
+SELECT name FROM users
+EXCEPT
+SELECT name FROM admins;`
+
+const insertMysql = `-- 单行插入
+INSERT INTO users (name, email)
+VALUES ('Alice', 'a@example.com');
+
+-- 批量插入
+INSERT INTO users (name, email)
+VALUES
+  ('Alice', 'a@example.com'),
+  ('Bob', 'b@example.com');
+
+-- 插入查询结果
+INSERT INTO user_backup
+SELECT * FROM users WHERE status = 'active';`
+
+const insertPgsql = `-- 单行插入
+INSERT INTO users (name, email)
+VALUES ('Alice', 'a@example.com');
+
+-- 批量插入
+INSERT INTO users (name, email)
+VALUES
+  ('Alice', 'a@example.com'),
+  ('Bob', 'b@example.com');
+
+-- 插入查询结果
+INSERT INTO user_backup
+SELECT * FROM users WHERE status = 'active';
+
+-- 带 RETURNING
+INSERT INTO users (name)
+VALUES ('Alice')
+RETURNING id;`
+
+const updateMysql = `-- 基本更新
+UPDATE users SET name = 'Bob'
+WHERE id = 1;
+
+-- 多表更新
+UPDATE users u
+JOIN orders o ON u.id = o.user_id
+SET u.status = 'active'
+WHERE o.amount > 100;`
+
+const updatePgsql = `-- 基本更新
+UPDATE users SET name = 'Bob'
+WHERE id = 1;
+
+-- 多表更新 (用 FROM)
+UPDATE users SET status = 'active'
+FROM orders o
+WHERE users.id = o.user_id
+  AND o.amount > 100;
+
+-- 带 RETURNING
+UPDATE users SET name = 'Bob'
+WHERE id = 1
+RETURNING *;`
+
+const deleteMysql = `-- 基本删除
+DELETE FROM users WHERE id = 1;
+
+-- 多表删除
+DELETE u, o FROM users u
+JOIN orders o ON u.id = o.user_id
+WHERE u.status = 'banned';
+
+-- 清空表
+TRUNCATE TABLE users;`
+
+const deletePgsql = `-- 基本删除
+DELETE FROM users WHERE id = 1;
+
+-- 使用 USING 多表删除
+DELETE FROM users
+USING orders o
+WHERE users.id = o.user_id
+  AND users.status = 'banned';
+
+-- 带 RETURNING
+DELETE FROM users WHERE id = 1
+RETURNING *;
+
+-- 清空表
+TRUNCATE TABLE users;`
+
+const explainMysql = `-- 查看执行计划
+EXPLAIN SELECT * FROM users
+WHERE email = 'a@example.com';
+
+-- 详细执行计划
+EXPLAIN ANALYZE SELECT * FROM users
+WHERE email = 'a@example.com';
+
+-- FORMAT=JSON (MySQL 5.7+)
+EXPLAIN FORMAT=JSON
+SELECT * FROM users WHERE id = 1;`
+
+const explainPgsql = `-- 查看执行计划
+EXPLAIN SELECT * FROM users
+WHERE email = 'a@example.com';
+
+-- 详细执行计划 (含实际执行时间)
+EXPLAIN ANALYZE SELECT * FROM users
+WHERE email = 'a@example.com';
+
+-- JSON 格式
+EXPLAIN (FORMAT JSON) SELECT * FROM users
+WHERE id = 1;
+
+-- 更多选项
+EXPLAIN (ANALYZE, BUFFERS, VERBOSE)
+SELECT * FROM users WHERE id = 1;`
 </script>
 
 <CodeCompare title="字符串引号" description="MySQL 支持单引号和双引号, PostgreSQL 严格区分" :mysql="quotesMysql" :postgresql="quotesPgsql" />
@@ -95,3 +264,15 @@ SELECT '123'::INTEGER + 0;  -- 必须显式转换`
 <CodeCompare title="GROUP_CONCAT vs STRING_AGG" description="行转字符串聚合" :mysql="groupConcatMysql" :postgresql="groupConcatPgsql" />
 
 <CodeCompare title="类型转换" :mysql="castMysql" :postgresql="castPgsql" />
+
+<CodeCompare title="JOIN 连接" description="连接查询语法的差异" :mysql="joinMysql" :postgresql="joinPgsql" />
+
+<CodeCompare title="集合操作" description="UNION / INTERSECT / EXCEPT" :mysql="unionMysql" :postgresql="unionPgsql" />
+
+<CodeCompare title="INSERT 语句" description="插入数据的语法差异" :mysql="insertMysql" :postgresql="insertPgsql" />
+
+<CodeCompare title="UPDATE 语句" description="更新数据的语法差异" :mysql="updateMysql" :postgresql="updatePgsql" />
+
+<CodeCompare title="DELETE 语句" description="删除数据的语法差异" :mysql="deleteMysql" :postgresql="deletePgsql" />
+
+<CodeCompare title="EXPLAIN 执行计划" description="查看查询执行计划" :mysql="explainMysql" :postgresql="explainPgsql" />
